@@ -151,6 +151,29 @@ void hash_table_insert(HashTable *ht, char *key, char *value)
  */
 void hash_table_remove(HashTable *ht, char *key)
 {
+
+  int index = hash(key, ht->capacity);
+
+  LinkedPair *current = ht->storage[index];
+  LinkedPair *previous = ht->storage[index];
+
+  while (current->next != NULL)
+  {
+    // If a the  key matches a pair's key already in
+    // the linked list, overwrite that value
+    if (strcmp(current->key, key) == 0)
+    {
+      LinkedPair *temp = current;
+      previous->next = temp->next;
+      current = current->next;
+      free(temp);
+    }
+    else
+    {
+      previous = current;
+      current = current->next;
+    }
+  }
 }
 
 /*
@@ -197,7 +220,10 @@ int main(void)
 
   hash_table_insert(ht, "line_1", "Tiny hash table\n");
   // hash_table_insert(ht, "line_2", "Filled beyond capacity\n");
-  // hash_table_insert(ht, "line_3", "Linked list saves the day!\n");
+  hash_table_insert(ht, "line_3", "Linked list saves the day!\n");
+  hash_table_insert(ht, "line_5", "One More for the road!\n");
+
+  hash_table_remove(ht, "line_3");
 
   // printf("%s", hash_table_retrieve(ht, "line_1"));
   // printf("%s", hash_table_retrieve(ht, "line_2"));
