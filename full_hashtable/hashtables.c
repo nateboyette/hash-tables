@@ -159,10 +159,12 @@ void hash_table_remove(HashTable *ht, char *key)
 
   while (current->next != NULL)
   {
-    // If a the  key matches a pair's key already in
-    // the linked list, overwrite that value
+    // If the keys match, point the previous node
+    // to the current node's next value
+    // then free the current node
     if (strcmp(current->key, key) == 0)
     {
+      printf("Key %s at index %d is being removed\n", key, index);
       LinkedPair *temp = current;
       previous->next = temp->next;
       current = current->next;
@@ -186,6 +188,21 @@ void hash_table_remove(HashTable *ht, char *key)
  */
 char *hash_table_retrieve(HashTable *ht, char *key)
 {
+  int index = hash(key, ht->capacity);
+  LinkedPair *current = ht->storage[index];
+
+  while (current->next != NULL)
+  {
+    // If a the  key matches a pair's key in the linked list
+    // return the value
+    if (strcmp(current->key, key) == 0)
+    {
+      return current->value;
+    }
+    current = current->next;
+  }
+
+  printf("Key not found\n");
   return NULL;
 }
 
@@ -196,6 +213,23 @@ char *hash_table_retrieve(HashTable *ht, char *key)
  */
 void destroy_hash_table(HashTable *ht)
 {
+  for (int i = 0; i < ht->capacity; i++)
+  {
+    if (ht->storage[i] != NULL)
+    {
+      LinkedPair *current = ht->storage[i];
+      while (current->next != NULL)
+      {
+        LinkedPair *temp = current;
+        current = current->next;
+        free(temp);
+      }
+      free(current);
+    }
+  }
+
+  free(ht->storage);
+  free(ht);
 }
 
 /*
@@ -223,11 +257,9 @@ int main(void)
   hash_table_insert(ht, "line_3", "Linked list saves the day!\n");
   hash_table_insert(ht, "line_5", "One More for the road!\n");
 
-  hash_table_remove(ht, "line_3");
-
-  // printf("%s", hash_table_retrieve(ht, "line_1"));
+  printf("%s", hash_table_retrieve(ht, "line_1"));
   // printf("%s", hash_table_retrieve(ht, "line_2"));
-  // printf("%s", hash_table_retrieve(ht, "line_3"));
+  printf("%s", hash_table_retrieve(ht, "line_3"));
 
   // int old_capacity = ht->capacity;
   // ht = hash_table_resize(ht);
